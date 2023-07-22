@@ -62,6 +62,7 @@ isBanned: {
 
 },{timestamps:true});
 
+
 const User = mongoose.model('Users', userSchema)
 
 

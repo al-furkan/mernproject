@@ -15,6 +15,20 @@
 15. GET/ api users -> isAdmin ->getALLUSers -> saarchByName + pagination functionality
 16. responseHandler controller for error or success
 17. GET / api / users/ : id -> get a single user by id
+18. how to create services in the backend
+19. DELETE/ api/ users : id -> delete a single user by id 
+20. refactoring & reusability , dynamic
+21. add express validator middleware
+22. deleteImage helper
+23. Post / api / user/process-register -. Process the registeration
+25. Post / api / user/verify -> verify + register int to database
+26. add multer- middleware for file upload 
+27. Put / api / users / :id -> update a single user by id
+28. creat jwt
+29. set smtp server & prepare email
+30. send mail with node mailer
+
+
 
 
 
