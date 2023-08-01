@@ -11,6 +11,7 @@ const { deleteImage } = require('../healper/deleteUser');
 const { createJsonWebToken } = require('../healper/jesonwebtoken');
 const { jwtActivationkey } = require('../secret');
 const sendEmailWithNodeMailer = require('../healper/email');
+const e = require('express');
 
 
 
@@ -78,7 +79,7 @@ const getUser = async(req , res, next)=>{
 
 const deleteUser = async(req , res, next)=>{
         try{
-            const id = req. params.id;
+            const id = req.params.id;
             const options ={ password : 0};
             const user = await User. findWithId(id, options);
              
@@ -142,19 +143,6 @@ const processRagister = async(req , res, next)=>{
 
        }
 
-
-        const newUser = {
-            name,
-            email,
-            password,
-            phone,
-            address,
-        };
-        console.log(token);
-
-
-
-        
         return successResponse(res, {
             statusCode: 200,
             message: `please  go to your ${email} for  completing your ragistation process`,
@@ -167,4 +155,49 @@ const processRagister = async(req , res, next)=>{
        }
 }
 
-module.exports = { getUsers, getUser, deleteUser, processRagister };
+
+const activateUserAccound = async(req , res, next)=>{
+    try{
+
+    const token = req.body.token;
+    if(!token)throw createError(404,'token not found');
+   try{
+    const decoder =jwt.varify(token,jwtActivationkey);
+    if(!decoder) throw createError(401,"Unable to verify user");
+    const userExists = await User.exists({email:decoder.email})
+        
+    if(userExists){
+        throw createError(409, 'User this email already exists.  please log in');
+    }
+
+
+    await User.create(decoder);
+       
+    return successResponse(res,{
+        statusCode:201,
+        massage:'User was register successfuly'
+    });
+      
+   }
+
+   catch(error){
+    if(error.name==='TokenExpiredError'){
+        throw createError(401,'Token has expired');
+    }
+    else if(error.name==='jsonWebTokenError'){
+
+           throw createError(401,'Invalid Token');
+    }
+    else{
+        throw error;
+
+   }
+}
+}
+    
+ catch(error){
+        next(error);
+       }
+}
+
+module.exports = { getUsers, getUser, deleteUser, processRagister,activateUserAccound };
