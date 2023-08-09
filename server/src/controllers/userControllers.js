@@ -110,6 +110,16 @@ const processRagister = async(req , res, next)=>{
     try{
 
         const { name , email , password , Phone , address} = req.body;
+        const image = req.file;
+
+        if(!image){
+            throw createError(400, 'Image file is required');
+        }
+        if(image.size>1024*1024*2){
+            throw new Error('Image file is to learge');
+        }
+
+        const imageBufferString = image.buffer.toString('base64');
 
         const userExists = await User.exists({email: email})
         
@@ -118,7 +128,8 @@ const processRagister = async(req , res, next)=>{
         }
          
         //create jwt
-       const token= createJsonWebToken({name , email , password , Phone , address},jwtActivationkey,'10m');
+       const token= createJsonWebToken({name , email , password , Phone , address ,image:imageBufferString},
+        jwtActivationkey,'10m');
 
        // prepair email
        const emailData = {
@@ -199,5 +210,61 @@ const activateUserAccound = async(req , res, next)=>{
         next(error);
        }
 }
+const UserUpdatebyid = async(req , res, next)=>{
+    try{
+        const Userid = req.params.id;
+        const updateoptions ={ 
+            new:true,
+            runValidation: true,
+            context:'query',
+        };
 
-module.exports = { getUsers, getUser, deleteUser, processRagister,activateUserAccound };
+        let updates={
+       
+    };
+
+
+// name ,email, paswsword, phone ,image addresas,
+
+    if(req.body.name){
+            updates.name = req.body.name;
+    }
+    if(req.body.password){
+            updates.password = req.body.password;
+    }
+    if(req.body.phone){
+                updates.phone = req.body.phone;
+    }
+    if(req.body.address){
+                updates.address = req.body.address;
+    }
+
+    const image = req.file;
+
+    if(image){
+        if(image.size>1024*1024*2){
+            throw createError(400,'Image file is to learge. It must be less then 2MB');
+        }
+        updates.image = image.buffer.toString('base64');
+    }
+       
+
+    const updateUser =await User.findByIdAndUpdate(Userid,updates,updateoptions);
+
+     if(!updateUser){
+        throw createError(404,'user with this id does not exist')
+     }
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: 'User was Update successfully',
+            payload: updateUser,
+        });
+    }
+    
+       catch(error){
+        next(error);
+       }
+}
+module.exports = { getUsers, getUser, deleteUser, processRagister,activateUserAccound,UserUpdatebyid };
