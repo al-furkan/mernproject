@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require('cookie-parser')
 const morgan = require("morgan");
 const bodyParser  = require("body-parser");
 const createError = require('http-errors');
@@ -7,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const useRouter = require("./routers/useRouter");
 const seedRouter = require("./routers/seedrouter");
 const { errorResponse } = require("./controllers/responseController");
+const authRouter = require("./routers/authRouter");
 
 
 const app  = express();
@@ -16,7 +18,7 @@ const rateLimiter = rateLimit({
     max: 5,
     message: 'Too many requests from this IP. please try again later',
 })
-
+app.use(cookieParser());
 app.use(rateLimiter);
 app.use(xssClean());
 app.use(morgan("dev"));
@@ -24,6 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
 app.use('/api/user',useRouter);
+app.use('/api/auth',authRouter);
 app.use('/api/seed',seedRouter);
 
 //client error handling 

@@ -27,7 +27,15 @@
 28. creat jwt
 29. set smtp server & prepare email
 30. send mail with node mailer
-
+31. add multer middleware for file upload
+32. filtering files by dsize and type
+33. add express validator middleware
+34. should we store image as string or buffer
+35. Put/ api/user/:id -> update a single user by id
+36. Post /api /auth/ login ->user login
+37. Post / api/auth/logout ->user logout
+38. middlewares -> isloggedin, isloggedout, isAdmin
+39. Get/ api/ auth/refresh -> refresh the token
 
 
 

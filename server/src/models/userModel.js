@@ -34,8 +34,8 @@ password:{
     
 },
 image:{
-    type:String,
-    default: defaultImagePath, 
+    type:Buffer,
+    contentType: String, 
 },
 address:{
     type:String,

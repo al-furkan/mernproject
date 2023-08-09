@@ -1,12 +1,13 @@
 const createError = require('http-errors');
-const fs = require('fs').promises;
 
+const jwt =require('jsonwebtoken');
 
 const User = require('../models/userModel');
 const { successResponse } = require('./responseController');
 const {  findWithId } = require('../servises/finditem');
 //const { options } = require('../app');
 //const { error } = require('console');
+//const fs = require('fs').promises;
 const { deleteImage } = require('../healper/deleteUser');
 const { createJsonWebToken } = require('../healper/jesonwebtoken');
 const { jwtActivationkey } = require('../secret');
@@ -60,7 +61,7 @@ const getUser = async(req , res, next)=>{
     try{
         const id = req. params.id;
         const options ={ password : 0};
-        const user = await findWithId(id, options);
+        const user = await findWithId(id,options);
 
         return successResponse(res, {
             statusCode: 200,
@@ -135,11 +136,11 @@ const processRagister = async(req , res, next)=>{
        const emailData = {
          email,
          subject: 'Account Activation Email',
-         html:`<h2> hello ${name}!</h2> 
-         <p> please click here to <a href =" ${CLIENT_URL}/api/users/activate/${token} target ="_blank"> 
-         activate your accound </a></p>
+        //  html:`<h2> hello ${name}!</h2> 
+        //  <p> please click here to <a href ="${CLIENT_URL}/api/users/activate/${token} target ="_blank"> 
+        //  activate your accound </a></p>
          
-         `
+        //  `
 
        }
 
@@ -213,6 +214,8 @@ const activateUserAccound = async(req , res, next)=>{
 const UserUpdatebyid = async(req , res, next)=>{
     try{
         const Userid = req.params.id;
+
+         await findWithId(User,id,options);
         const updateoptions ={ 
             new:true,
             runValidation: true,
@@ -226,17 +229,13 @@ const UserUpdatebyid = async(req , res, next)=>{
 
 // name ,email, paswsword, phone ,image addresas,
 
-    if(req.body.name){
-            updates.name = req.body.name;
-    }
-    if(req.body.password){
-            updates.password = req.body.password;
-    }
-    if(req.body.phone){
-                updates.phone = req.body.phone;
-    }
-    if(req.body.address){
-                updates.address = req.body.address;
+    for(let key in req.body){
+        if(['name','password','phone','address'].includes(key)){
+            updates[key]=req.body[key];
+        }
+        else if(['email'].includes(key)){
+            throw createError(400,'email can not updated');
+        }
     }
 
     const image = req.file;
@@ -248,8 +247,9 @@ const UserUpdatebyid = async(req , res, next)=>{
         updates.image = image.buffer.toString('base64');
     }
        
+    //delete updates.email;
 
-    const updateUser =await User.findByIdAndUpdate(Userid,updates,updateoptions);
+    const updateUser =await User.findByIdAndUpdate(Userid,updates,updateoptions).select("-password");
 
      if(!updateUser){
         throw createError(404,'user with this id does not exist')
