@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 
 const jwt =require('jsonwebtoken');
-
+const bcrypt =require('bcrypt');
 const User = require('../models/userModel');
 const { successResponse } = require('./responseController');
 const {  findWithId } = require('../servises/finditem');
@@ -10,7 +10,7 @@ const {  findWithId } = require('../servises/finditem');
 //const fs = require('fs').promises;
 const { deleteImage } = require('../healper/deleteUser');
 const { createJsonWebToken } = require('../healper/jesonwebtoken');
-const { jwtActivationkey } = require('../secret');
+const { jwtActivationkey, jwtresetkey } = require('../secret');
 const sendEmailWithNodeMailer = require('../healper/email');
 const e = require('express');
 
@@ -267,4 +267,205 @@ const UserUpdatebyid = async(req , res, next)=>{
         next(error);
        }
 }
-module.exports = { getUsers, getUser, deleteUser, processRagister,activateUserAccound,UserUpdatebyid };
+const HandelbanduserByid = async(req , res, next)=>{
+    try{
+        const Userid = req.params.id;
+         await findWithId(User,Userid);
+         const updates={isBanned:true};
+        const updateoptions ={ 
+            new:true,
+            runValidation: true,
+            context:'query',
+        };
+
+    //delete updates.email;
+
+    const updateUser =await User.findByIdAndUpdate(Userid,updates,updateoptions).select("-password");
+
+     if(!updateUser){
+        throw createError(404,'user was not banned successfuly');
+     }
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: 'User was banned successfully',
+            payload: {updateUser},
+        });
+    }
+    
+       catch(error){
+        next(error);
+       }
+}
+const UnHandelbanduserByid = async(req , res, next)=>{
+    try{
+        const Userid = req.params.id;
+         await findWithId(User,Userid);
+         const updates={isBanned:false};
+        const updateoptions ={ 
+            new:true,
+            runValidation: true,
+            context:'query',
+        };
+
+    //delete updates.email;
+
+    const updateUser =await User.findByIdAndUpdate(Userid,updates,updateoptions).select("-password");
+
+     if(!updateUser){
+        throw createError(404,'user was not Unbanned successfuly');
+     }
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: 'User was Unbanned successfully',
+            payload: {updateUser},
+        });
+    }
+    
+       catch(error){
+        next(error);
+       }
+}
+
+const UpdatepasswordByid = async(req , res, next)=>{
+    try{
+        
+        const { oldPassword , newPassword}=res.body;
+        const Userid = req.params.id;
+        const user = await findWithId(User,Userid);
+
+        // compare the password
+        const isPasswordmatch = await bcrypt.compare(oldPassword,user.password);
+        if(!isPasswordmatch){
+            throw createError(401,'OldPassword is not correct');
+         }
+         //const filter = {Userid};
+          const updates={$set:{password:newPassword}};
+        const updateoptions ={ 
+         new:true,
+           
+         }
+
+    // //delete updates.email;
+
+    const updateUser =await User.findByIdAndUpdate(Userid,updates,updateoptions).select("-password");
+
+      if(!updateUser){
+         throw createError(404,'user was not updated successfuly');
+      }
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: 'Password Updated successfully',
+            payload: {updateUser},
+        });
+    }
+    
+       catch(error){
+        next(error);
+       }
+}
+
+const ForgetpasswordByid = async(req , res, next)=>{
+    try{
+         const {email}= req.body;
+         const userdata = await User.findOne({email:email});
+         if(!userdata){
+            throw createError("Email did not Exit.Please enter Your Correct email or Registered now")
+         }
+          //create jwt
+       const token= createJsonWebToken({email},
+        jwtresetkey,'10m');
+
+       // prepair email
+       const emailData = {
+         email,
+         subject: 'Reset Password  Email',
+          html:`<h2> hello ${userdata.name}!</h2> 
+          <p> please click here to <a href ="${CLIENT_URL}/api/users/reset-password/${token} target ="_blank"> 
+          Reset your accound </a></p>
+         
+         `
+
+       }
+
+
+       // send email with nodemail
+
+       try{
+        await sendEmailWithNodeMailer(emailData);
+       }catch(error){
+         next(createError(500,'failed to send resetPassword varification email'));
+         return;
+
+       }
+       
+        return successResponse(res, {
+            statusCode: 200,
+            message: 'FOrget Password Updated successfully',
+            payload: {updateUser},
+        });
+    }
+    
+       catch(error){
+        next(error);
+       }
+}
+
+
+const ResetpasswordByid = async(req , res, next)=>{
+    try{
+         
+        const {token, password} = req.body;
+        const decoded =jwt.varify(token,jwtresetkey);
+        const filter ={email: decoded.email};
+        const update = {password: password};
+        const options = {new: true};
+        if(!decoded){
+          throw createError(400,"Invalid or Expaired token");
+
+        }
+           
+    const updateUser =await User.findOneAndUpdate(filter,update,options).select("-password");
+
+    if(!updateUser){
+       throw createError(404,'Password reset faild');
+    }
+
+       
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: 'Password Reset successfully',
+        });
+    }
+    
+       catch(error){
+        next(error);
+       }
+}
+
+
+
+
+
+
+
+
+module.exports = {
+    getUsers,
+    getUser,
+    deleteUser,
+    processRagister,
+    activateUserAccound,
+    UserUpdatebyid,
+    HandelbanduserByid,
+    UnHandelbanduserByid,
+    UpdatepasswordByid,
+    ForgetpasswordByid,
+    ResetpasswordByid
+ };

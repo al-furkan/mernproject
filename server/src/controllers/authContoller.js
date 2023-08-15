@@ -28,23 +28,25 @@ const handleLogin= async(req, res, next)=>{
         if(!user.isBanned){
             throw createError(403,'You are banned .please contact authority');
          }
+
+        
         // token, cooking
          //create jwt
        const accessToken= createJsonWebToken({user},
         jwtaccesskey,'15m');
-
+     
         res.cookie('accessToken',accessToken,{
             maxAge:15*60*1000,
             httpOnly:true,
             secure: true,
             sameSite:'none'
         })
-
+        const userwithout = await User.findOne({email}).select("-password");
        //success response
        return successResponse(res,{
         statusCode:200,
         message:'user Login successfully',
-        payload:{user}
+        payload:{userwithout}
        })
     } catch (error) {
         next(error);

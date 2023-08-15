@@ -36,6 +36,8 @@
 37. Post / api/auth/logout ->user logout
 38. middlewares -> isloggedin, isloggedout, isAdmin
 39. Get/ api/ auth/refresh -> refresh the token
+40. put/ api/ user / band -> band user 
+41. put / api / user / band -> unband user
 
 
 
