@@ -9,7 +9,7 @@ const useRouter = express.Router();
 useRouter.post('/process-register', upload.single('image'),isLoggedOut, validateuserRegistration,runValidation,processRagister);
 useRouter.post('/verify',isLoggedOut,activateUserAccound);
 useRouter.get('/',isLoggedIn,isAdmin, getUsers);
-useRouter.get('/:id',isLoggedIn, getUser);
+useRouter.get('/:id([0-9a-fA-F]{24})',isLoggedIn, getUser);
 useRouter.delete('/:id',isLoggedIn,deleteUser);
 useRouter.put('/reset-password/',validateuserResetpassword,runValidation,ResetpasswordByid);
 useRouter.put('/:id',upload.single('image'),isLoggedIn,UserUpdatebyid);

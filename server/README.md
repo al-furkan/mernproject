@@ -38,6 +38,27 @@
 39. Get/ api/ auth/refresh -> refresh the token
 40. put/ api/ user / band -> band user 
 41. put / api / user / band -> unband user
+42. forgetpassword refactoring
+43. reset password 
+44. refactroing 
+45. modular coad structure
+46. winston logger library
+47. catagory model and Input validation 
+48. catagory  curd - creat catagorie POst : api/catagories 
+49. catagori card read catagories
+GET:api/categories
+    GET: api/categories/:slug
+
+50. category CRUD - Update CateGory -DELETE api/categories/:slug
+51. Category CRUD - Delete CATeGOry - DELETE: api/ cataegories / : slug
+52. Product Api -Product model
+53. Product api - creat seed route for testing products
+54. product Api - create Product 
+55. product Api - read product 
+56. product Api - delete product  
+57. product Api - Update  product  
+58. product Api - search  product  
+
 
 
 

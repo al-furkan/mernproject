@@ -4,7 +4,7 @@ const jwt =require('jsonwebtoken');
 const { createJsonWebToken } = require('../healper/jesonwebtoken');
 const User = require('../models/userModel');
 const { successResponse } = require('./responseController');
-const { jwtaccesskey } = require('../secret');
+const { jwtaccesskey, jwtRefreshkey } = require('../secret');
 
 
 
@@ -33,15 +33,27 @@ const handleLogin= async(req, res, next)=>{
         // token, cooking
          //create jwt
        const accessToken= createJsonWebToken({user},
-        jwtaccesskey,'15m');
+        jwtaccesskey,'2m');
      
         res.cookie('accessToken',accessToken,{
-            maxAge:15*60*1000,
+            maxAge:2*60*1000,
             httpOnly:true,
             secure: true,
             sameSite:'none'
         })
-        const userwithout = await User.findOne({email}).select("-password");
+         // token, cooking
+         //create jwt
+       const refreshToken= createJsonWebToken({user},
+        jwtRefreshkey,'7d');
+     
+        res.cookie('refreshToken',refreshToken,{
+            maxAge:7*24*60*60*1000,
+            httpOnly:true,
+            secure: true,
+            sameSite:'none'
+        })
+        const userwithout = await  user.toObject();
+        delete userwithout.password;
        //success response
        return successResponse(res,{
         statusCode:200,
@@ -59,6 +71,7 @@ const handleLogout= async(req, res, next)=>{
 
     try {
         res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
         
        //success response
        return successResponse(res,{
@@ -70,7 +83,83 @@ const handleLogout= async(req, res, next)=>{
         next(error);
     }
 
+}
+
+//refarse token
+const handlerefressToken= async(req, res, next)=>{
+
+    try {
+  
+        const oldReferceToken=req.body.refreshToken;
+
+        //varify refresh token
+         const decodedToken = jwt.verify(oldReferceToken,jwtRefreshkey);
+         if(!decodedToken){
+            throw createError(404, "invalid refresh token .Please login Again");
+         }
+
+
+        // token, cooking
+         //create jwt
+         const accessToken= createJsonWebToken(decodedToken.user,
+            jwtaccesskey,'2m');
+         
+            res.cookie('accessToken',accessToken,{
+                maxAge:2*60*1000,
+                httpOnly:true,
+                secure: true,
+                sameSite:'none'
+            })
+
+
+       //success response
+       return successResponse(res,{
+        statusCode:200,
+        message:'new acccess token is generated',
+        payload:{}
+       })
+    } catch (error) {
+        next(error);
+    }
+
 
 }
 
-module.exports = {handleLogin,handleLogout};
+//refarse token
+const handleProtect= async(req, res, next)=>{
+
+    try {
+  
+        const accessToken=req.body.accessToken;
+
+        //varify refresh token
+         const decodedToken = jwt.verify(accessToken,jwtaccesskey);
+         if(!decodedToken){
+            throw createError(404, "invalid Access token .Please login Again");
+         }
+
+
+        // token, cooking
+         //create jwt
+            res.cookie('accessToken',accessToken,{
+                maxAge:2*60*1000,
+                httpOnly:true,
+                secure: true,
+                sameSite:'none'
+            })
+
+
+       //success response
+       return successResponse(res,{
+        statusCode:200,
+        message:'Access token valide successfully',
+        payload:{}
+       })
+    } catch (error) {
+        next(error);
+    }
+
+
+}
+
+module.exports = {handleLogin,handleLogout,handlerefressToken,handleProtect};

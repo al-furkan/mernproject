@@ -135,5 +135,4 @@ const validateuserForgetpassword =[
 
 
 
-
 module.exports = {validateuserRegistration,validateuserLogin,validateuserUpdatepassword,validateuserForgetpassword,validateuserResetpassword}
