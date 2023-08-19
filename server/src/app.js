@@ -10,6 +10,7 @@ const seedRouter = require("./routers/seedrouter");
 const { errorResponse } = require("./controllers/responseController");
 const authRouter = require("./routers/authRouter");
 const catagoriRouter = require("./routers/catagoriRouter");
+const productRouter = require("./routers/productRouter");
 
 
 const app  = express();
@@ -30,6 +31,7 @@ app.use('/api/user',useRouter);
 app.use('/api/auth',authRouter);
 app.use('/api/seed',seedRouter);
 app.use('/api/categories',catagoriRouter);
+app.use('/api/product',productRouter);
 
 //client error handling 
 app.use((req,res,next)=>{

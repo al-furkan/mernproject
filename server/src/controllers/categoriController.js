@@ -1,5 +1,4 @@
 var slugify = require('slugify');
-
 const { successResponse } = require("./responseController");
 const Catagori = require('../models/catagoriModel');
 const { catagoriServise, getcatagories,getcatagory,catagoriUpdate, catagoryDelete } = require('../servises/catagoryServise');

@@ -36,6 +36,7 @@ password:{
 image:{
     type:Buffer,
     contentType: String, 
+    required:[true, 'User image is required'],
 },
 address:{
     type:String,

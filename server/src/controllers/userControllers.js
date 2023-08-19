@@ -1,5 +1,4 @@
 const createError = require('http-errors');
-
 const jwt =require('jsonwebtoken');
 const bcrypt =require('bcrypt');
 const User = require('../models/userModel');
@@ -12,7 +11,7 @@ const { deleteImage } = require('../healper/deleteUser');
 const { createJsonWebToken } = require('../healper/jesonwebtoken');
 const { jwtActivationkey, jwtresetkey } = require('../secret');
 const sendEmailWithNodeMailer = require('../healper/email');
-const e = require('express');
+const express = require('express');
 
 
 
